@@ -1,0 +1,6 @@
+PORT=1000
+JWT_SECRET=your_jwt_secret
+POSTGRES_DB=postgres
+POSTGRES_USER=user
+POSTGRES_PASSWORD=password
+POSTGRES_HOST=localhost
