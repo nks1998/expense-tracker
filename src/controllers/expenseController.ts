@@ -1,6 +1,8 @@
 import { Response } from 'express';
 import Expense from '../models/expense';
 import { AuthenticatedRequest } from '../middlewares/auth';
+import { Op } from 'sequelize';
+import moment from 'moment';
 
 // Create a new expense
 export const createExpense = async (req: AuthenticatedRequest, res: Response) => {
@@ -60,6 +62,34 @@ export const getExpenseById = async (req: AuthenticatedRequest, res: Response) =
     }
 
     res.status(200).json(expense);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching expense', error });
+  }
+};
+
+// Get a specific expense by ID
+export const getExpenseByData = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const startDate =  req.query.startdate || moment()
+    const endDate = req.query.enddate || startDate
+    const userId = req.user.id;
+    const limit = Number(req.query.limit);
+    const offset = Number(req.query.offset);
+
+    const expenses = await Expense.findAndCountAll({
+      offset,
+      limit,
+      where: {
+        userId,
+        // date: {
+        //   [Op.lte]: new Date(),
+        //   [Op.gte]: new Date(),
+        // }
+      },
+      order: [['date','ASC']]
+    });
+
+    res.status(200).json(expenses);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching expense', error });
   }

@@ -1,6 +1,5 @@
-import { Association, DataTypes, Model, Optional } from 'sequelize';
+import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from './db_config';
-import User from './user';
 
 interface ExpenseAttributes {
   id: number;
