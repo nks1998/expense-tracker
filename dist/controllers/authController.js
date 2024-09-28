@@ -16,6 +16,7 @@ exports.login = exports.register = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_1 = __importDefault(require("../models/user"));
+const http_errors_1 = __importDefault(require("http-errors"));
 // Register User
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, password } = req.body;
@@ -23,10 +24,10 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const hashedPassword = yield bcryptjs_1.default.hash(password, salt);
     try {
         const user = yield user_1.default.create({ username, password: hashedPassword });
-        res.status(201).json({ message: 'User created', userId: user.id });
+        return res.status(201).json({ message: "User created", userId: user.id });
     }
     catch (error) {
-        res.status(400).json({ message: 'Error creating user', error });
+        return http_errors_1.default.InternalServerError("Error creating user");
     }
 });
 exports.register = register;
@@ -36,18 +37,18 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield user_1.default.findOne({ where: { username } });
         if (!user) {
-            return res.status(400).json({ message: 'User not found' });
+            return res.status(400).json({ message: "User not found" });
         }
         const validPassword = yield bcryptjs_1.default.compare(password, user.password);
         if (!validPassword) {
-            return res.status(400).json({ message: 'Invalid password' });
+            return http_errors_1.default.Unauthorized("Invalid username/password!");
         }
         const secret = process.env.JWT_SECRET;
-        const token = jsonwebtoken_1.default.sign({ id: user.id }, secret, { expiresIn: '1h' });
+        const token = jsonwebtoken_1.default.sign({ id: user.id }, secret, { expiresIn: "1h" });
         res.json({ token });
     }
     catch (error) {
-        res.status(400).json({ message: 'Error logging in', error });
+        return http_errors_1.default.Unauthorized();
     }
 });
 exports.login = login;

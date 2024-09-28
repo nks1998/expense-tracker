@@ -12,13 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteExpense = exports.updateExpense = exports.getExpenseById = exports.getExpenses = exports.createExpense = void 0;
+exports.deleteExpense = exports.updateExpense = exports.getExpenseByData = exports.getExpenseById = exports.getExpenses = exports.createExpense = void 0;
 const expense_1 = __importDefault(require("../models/expense"));
+const moment_1 = __importDefault(require("moment"));
 // Create a new expense
 const createExpense = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { description, amount, date } = req.body;
-        const userId = req.user.id; // Assuming the auth middleware attaches the user to the req
+        const userId = req.user.id;
         const newExpense = yield expense_1.default.create({
             description,
             amount,
@@ -36,7 +37,6 @@ exports.createExpense = createExpense;
 const getExpenses = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const page = parseInt(req.query.page || '1');
     const limit = parseInt(req.query.limit || '10');
-    console.log(req.query, "niha");
     try {
         const expenses = yield expense_1.default.findAndCountAll({
             where: { userId: req.user.id }, // Ensure this filters by the authenticated user
@@ -74,6 +74,33 @@ const getExpenseById = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getExpenseById = getExpenseById;
+// Get a specific expense by ID
+const getExpenseByData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const startDate = req.query.startdate || (0, moment_1.default)();
+        const endDate = req.query.enddate || startDate;
+        const userId = req.user.id;
+        const limit = Number(req.query.limit);
+        const offset = Number(req.query.offset);
+        const expenses = yield expense_1.default.findAndCountAll({
+            offset,
+            limit,
+            where: {
+                userId,
+                // date: {
+                //   [Op.lte]: new Date(),
+                //   [Op.gte]: new Date(),
+                // }
+            },
+            order: [['date', 'ASC']]
+        });
+        res.status(200).json(expenses);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error fetching expense', error });
+    }
+});
+exports.getExpenseByData = getExpenseByData;
 // Update an expense
 const updateExpense = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
