@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from './db_config';
+import { ExpenseType } from '../enums/expenseType.enum';
 
 interface ExpenseAttributes {
   id: number;
@@ -7,6 +8,7 @@ interface ExpenseAttributes {
   amount: number;
   date: Date;
   userId: number;
+  type: string
 }
 
 interface ExpenseCreationAttributes extends Optional<ExpenseAttributes, 'id'> {}
@@ -17,6 +19,7 @@ class Expense extends Model<ExpenseAttributes, ExpenseCreationAttributes> implem
   public amount!: number;
   public date!: Date;
   public userId!: number;
+  public type: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -50,6 +53,11 @@ Expense.init(
         key: 'id',
       },
     },
+    type: {
+      type: DataTypes.ENUM(...Object.values(ExpenseType)),
+      allowNull: false,
+      defaultValue: ExpenseType.UNKNOWN
+    }
   },
   {
     sequelize,

@@ -6,16 +6,21 @@ import createHttpError from "http-errors";
 
 // Register User
 export const register = async (req: Request, res: Response,next: NextFunction) => {
-  const { username, password } = req.body;
+  const { password } = req.body;
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
+  delete req.body.password
 
   try {
-    const user = await User.create({ username, password: hashedPassword });
+    const user = await User.create({ ...req.body, password: hashedPassword });
     return res.status(201).json({ message: "User created", userId: user.id });
   } catch (error) {
-    throw createHttpError.Conflict("Invalid username/password!");
+    return next(
+      createHttpError.Conflict(
+        error.message || "Something went wrong during registration."
+      )
+    );
   }
 };
 
