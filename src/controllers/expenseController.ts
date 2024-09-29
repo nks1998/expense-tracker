@@ -1,7 +1,6 @@
 import { Response } from 'express';
 import Expense from '../models/expense';
 import { AuthenticatedRequest } from '../middlewares/auth';
-import { Op } from 'sequelize';
 import moment from 'moment';
 
 // Create a new expense
